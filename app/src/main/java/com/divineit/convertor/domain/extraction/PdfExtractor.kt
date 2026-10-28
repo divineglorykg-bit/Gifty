@@ -1,8 +1,8 @@
 package com.divineit.convertor.domain.extraction
 
 import com.divineit.convertor.domain.DocumentFormat
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.text.PDFTextStripper
 
 /**
  * PDF text-layer extraction via PdfBox-Android.
