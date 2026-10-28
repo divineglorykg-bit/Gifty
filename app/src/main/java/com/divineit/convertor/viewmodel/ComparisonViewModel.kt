@@ -23,6 +23,7 @@ import com.divineit.convertor.domain.extraction.PdfExtractor
 import com.divineit.convertor.domain.extraction.TxtExtractor
 import com.divineit.convertor.domain.ocr.MlKitOcrEngine
 import com.divineit.convertor.domain.ocr.ScannedPdfOcr
+import com.divineit.convertor.domain.progress.WorkProgress
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -190,12 +191,25 @@ class ComparisonViewModel(application: Application) : AndroidViewModel(applicati
     // Phase 3: comparison
     // ---------------------------------------------------------------
 
+    /** Live progress while a comparison runs: real page percentages
+     *  for PDFs (text layer or scanned), a label-only spinner for the
+     *  single-step phases. Null when idle. */
+    private val _progress = MutableStateFlow<WorkProgress?>(null)
+    val progress: StateFlow<WorkProgress?> = _progress.asStateFlow()
+
     fun runComparison(original: DocumentInfo, product: DocumentInfo) {
         viewModelScope.launch {
             _state.value = UiState.Running
             try {
-                val origDoc = withContext(Dispatchers.IO) { extract(original) }
-                val prodDoc = withContext(Dispatchers.IO) { extract(product) }
+                _progress.value = WorkProgress("Reading the original…")
+                val origDoc = withContext(Dispatchers.IO) {
+                    extract(original, "original")
+                }
+                _progress.value = WorkProgress("Reading the product…")
+                val prodDoc = withContext(Dispatchers.IO) {
+                    extract(product, "product")
+                }
+                _progress.value = WorkProgress("Comparing the documents…")
                 val result = DiffEngine.compare(origDoc, prodDoc)
                 lastOriginalDoc = origDoc
                 lastProductDoc = prodDoc
@@ -205,11 +219,13 @@ class ComparisonViewModel(application: Application) : AndroidViewModel(applicati
                 correctedDoc = null
                 auditLines.clear()
                 _corrections.value = CorrectionsState()
+                _progress.value = null
                 _state.value = UiState.Result(
                     result, original.displayName, product.displayName
                 )
                 _navigateEvent.emit(Unit)
             } catch (e: Exception) {
+                _progress.value = null
                 _state.value = UiState.Error(
                     e.message ?: "Comparison failed for an unknown reason."
                 )
@@ -217,16 +233,32 @@ class ComparisonViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    private suspend fun extract(info: DocumentInfo): ExtractedDocument {
+    private suspend fun extract(
+        info: DocumentInfo,
+        side: String
+    ): ExtractedDocument {
         val resolver = getApplication<Application>().contentResolver
         val uri = Uri.parse(info.uri)
         if (info.format == DocumentFormat.PDF) {
             val bytes = readBytes(info, uri)
-            val extracted = PdfExtractor().extract(bytes, info.displayName)
+            val extracted = PdfExtractor { done, total ->
+                _progress.value = WorkProgress(
+                    "Reading the $side (PDF) — page $done of $total",
+                    done, total
+                )
+            }.extract(bytes, info.displayName)
             if (extracted.paragraphs.isNotEmpty()) return extracted
             // No text layer: this is a scanned PDF. OCR is the honest
             // fallback; if it reads nothing, say so plainly.
-            val text = withContext(Dispatchers.IO) { ocrPdf(uri) }
+            val text = withContext(Dispatchers.IO) {
+                ocrPdf(uri) { done, total ->
+                    _progress.value = WorkProgress(
+                        "Reading the $side (scanned PDF) — " +
+                            "page $done of $total",
+                        done, total
+                    )
+                }
+            }
             if (text.isBlank()) {
                 throw IllegalStateException(
                     "“${info.displayName}” appears to be a scanned PDF " +
@@ -291,10 +323,13 @@ class ComparisonViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
 
-    private suspend fun ocrPdf(uri: Uri): String =
+    private suspend fun ocrPdf(
+        uri: Uri,
+        onProgress: ((done: Int, total: Int) -> Unit)? = null
+    ): String =
         suspendCancellableCoroutine { continuation ->
             val resolver = getApplication<Application>().contentResolver
-            ScannedPdfOcr.ocrAllPages(resolver, uri) { result ->
+            ScannedPdfOcr.ocrAllPages(resolver, uri, onProgress) { result ->
                 result.onSuccess { continuation.resumeWith(Result.success(it)) }
                 result.onFailure { continuation.resumeWithException(it) }
             }

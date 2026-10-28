@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.divineit.convertor.domain.convert.ConvertTarget
+import com.divineit.convertor.ui.components.ProgressBlock
 import com.divineit.convertor.viewmodel.OcrViewModel
 
 /** OCR and Text Extraction (Phase 5): read the text out of a photo,
@@ -90,8 +91,13 @@ fun OcrScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (state.busy) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                Text("Reading text… a scanned PDF is read page by page and can take a while.")
+                val p = state.progress
+                if (p != null) {
+                    ProgressBlock(progress = p)
+                } else {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    Text("Reading text… a scanned PDF is read page by page and can take a while.")
+                }
             }
             Button(
                 onClick = {

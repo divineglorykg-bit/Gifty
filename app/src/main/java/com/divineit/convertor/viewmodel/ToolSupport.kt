@@ -11,6 +11,7 @@ import com.divineit.convertor.domain.extraction.PdfExtractor
 import com.divineit.convertor.domain.extraction.TxtExtractor
 import com.divineit.convertor.domain.ocr.MlKitOcrEngine
 import com.divineit.convertor.domain.ocr.ScannedPdfOcr
+import com.divineit.convertor.domain.progress.WorkProgress
 import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -79,12 +80,29 @@ internal object ToolFiles {
         )
     }
 
-    suspend fun extract(application: Application, picked: PickedDocument): ExtractedDocument {
+    suspend fun extract(
+        application: Application,
+        picked: PickedDocument,
+        onProgress: ((WorkProgress) -> Unit)? = null
+    ): ExtractedDocument {
         when (picked.format) {
             DocumentFormat.PDF -> {
-                val extracted = PdfExtractor().extract(picked.bytes, picked.displayName)
+                val extracted = PdfExtractor { done, total ->
+                    onProgress?.invoke(
+                        WorkProgress(
+                            "Reading PDF — page $done of $total", done, total
+                        )
+                    )
+                }.extract(picked.bytes, picked.displayName)
                 if (extracted.paragraphs.isNotEmpty()) return extracted
-                val text = ocrPdf(application, picked.uri)
+                val text = ocrPdf(application, picked.uri) { done, total ->
+                    onProgress?.invoke(
+                        WorkProgress(
+                            "Reading scanned PDF — page $done of $total",
+                            done, total
+                        )
+                    )
+                }
                 if (text.isBlank()) {
                     throw IllegalStateException(
                         "“${picked.displayName}” appears to be a scanned PDF " +
@@ -125,9 +143,15 @@ internal object ToolFiles {
             }
         }
 
-    suspend fun ocrPdf(application: Application, uri: Uri): String =
+    suspend fun ocrPdf(
+        application: Application,
+        uri: Uri,
+        onProgress: ((done: Int, total: Int) -> Unit)? = null
+    ): String =
         suspendCancellableCoroutine { continuation ->
-            ScannedPdfOcr.ocrAllPages(application.contentResolver, uri) { result ->
+            ScannedPdfOcr.ocrAllPages(
+                application.contentResolver, uri, onProgress
+            ) { result ->
                 result.onSuccess { continuation.resumeWith(Result.success(it)) }
                 result.onFailure { continuation.resumeWithException(it) }
             }

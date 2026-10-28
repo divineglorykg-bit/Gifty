@@ -8,6 +8,7 @@ import com.divineit.convertor.domain.convert.ConversionEngine
 import com.divineit.convertor.domain.convert.ConvertTarget
 import com.divineit.convertor.domain.extraction.ExtractedDocument
 import com.divineit.convertor.domain.pdf.PdfTextWriter
+import com.divineit.convertor.domain.progress.WorkProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,7 @@ class ConversionViewModel(application: Application) : AndroidViewModel(applicati
         val tableCount: Int = 0,
         val target: ConvertTarget = ConvertTarget.DOCX,
         val message: String? = null,
+        val progress: WorkProgress? = null,
         val outputReady: Boolean = false
     )
 
@@ -45,16 +47,22 @@ class ConversionViewModel(application: Application) : AndroidViewModel(applicati
 
     fun pick(uri: Uri) {
         viewModelScope.launch {
-            _state.value = _state.value.copy(busy = true, message = null, outputReady = false)
+            _state.value = _state.value.copy(
+                busy = true, message = null, outputReady = false,
+                progress = WorkProgress("Reading the file…")
+            )
             outputBytes = null
             try {
                 val (picked, doc) = withContext(Dispatchers.IO) {
                     val loaded = ToolFiles.load(getApplication(), uri)
-                    loaded to ToolFiles.extract(getApplication(), loaded)
+                    loaded to ToolFiles.extract(getApplication(), loaded) { p ->
+                        _state.value = _state.value.copy(progress = p)
+                    }
                 }
                 extracted = doc
                 _state.value = _state.value.copy(
                     busy = false,
+                    progress = null,
                     sourceName = picked.displayName,
                     sourceFormat = picked.format.name,
                     paragraphCount = doc.paragraphs.size,
@@ -65,6 +73,7 @@ class ConversionViewModel(application: Application) : AndroidViewModel(applicati
                 extracted = null
                 _state.value = _state.value.copy(
                     busy = false,
+                    progress = null,
                     sourceName = null,
                     message = e.message ?: "That file could not be read."
                 )
@@ -84,7 +93,10 @@ class ConversionViewModel(application: Application) : AndroidViewModel(applicati
         }
         val target = _state.value.target
         viewModelScope.launch {
-            _state.value = _state.value.copy(busy = true, message = null)
+            _state.value = _state.value.copy(
+                busy = true, message = null,
+                progress = WorkProgress("Writing the ${target.label} file…")
+            )
             try {
                 val bytes = withContext(Dispatchers.Default) {
                     if (target == ConvertTarget.PDF) {
@@ -96,12 +108,14 @@ class ConversionViewModel(application: Application) : AndroidViewModel(applicati
                 outputBytes = bytes
                 _state.value = _state.value.copy(
                     busy = false,
+                    progress = null,
                     outputReady = true,
                     message = "Converted to ${target.label}. Save it to keep the file."
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     busy = false,
+                    progress = null,
                     message = e.message ?: "Conversion failed."
                 )
             }

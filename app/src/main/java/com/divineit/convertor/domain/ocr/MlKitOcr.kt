@@ -61,6 +61,7 @@ object ScannedPdfOcr {
     fun ocrAllPages(
         resolver: ContentResolver,
         uri: Uri,
+        onProgress: ((done: Int, total: Int) -> Unit)? = null,
         onResult: (Result<String>) -> Unit
     ) {
         val descriptor = resolver.openFileDescriptor(uri, "r")
@@ -97,6 +98,7 @@ object ScannedPdfOcr {
             engine.recognizeBitmap(bitmap) { result ->
                 result.onSuccess { text ->
                     pageTexts.add(text.trim())
+                    onProgress?.invoke(index + 1, renderer.pageCount)
                     nextPage(index + 1)
                 }
                 result.onFailure { error ->

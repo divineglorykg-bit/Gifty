@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.divineit.convertor.domain.convert.ConvertTarget
+import com.divineit.convertor.ui.components.ProgressBlock
 import com.divineit.convertor.viewmodel.EditorViewModel
 
 /** Document Editor (Phase 5): edit a document's paragraphs — rewrite
@@ -100,7 +101,12 @@ fun EditorScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (state.busy) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                val p = state.progress
+                if (p != null) {
+                    ProgressBlock(progress = p)
+                } else {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
             }
             Button(
                 onClick = { picker.launch(arrayOf("*/*")) },

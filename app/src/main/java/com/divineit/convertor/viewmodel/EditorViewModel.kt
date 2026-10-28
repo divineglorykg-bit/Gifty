@@ -8,6 +8,7 @@ import com.divineit.convertor.domain.convert.DocumentEditor
 import com.divineit.convertor.domain.convert.TxtWriter
 import com.divineit.convertor.domain.export.DocxWriter
 import com.divineit.convertor.domain.extraction.ExtractedDocument
+import com.divineit.convertor.domain.progress.WorkProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +28,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
         val sourceName: String? = null,
         val document: ExtractedDocument? = null,
         val message: String? = null,
-        val canUndo: Boolean = false
+        val canUndo: Boolean = false,
+        val progress: WorkProgress? = null
     )
 
     private val _state = MutableStateFlow(State())
@@ -40,13 +42,18 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
 
     fun pick(uri: Uri) {
         viewModelScope.launch {
-            _state.value = State(busy = true)
+            _state.value = State(
+                busy = true,
+                progress = WorkProgress("Reading the file…")
+            )
             undoStack.clear()
             outputBytes = null
             try {
                 val doc = withContext(Dispatchers.IO) {
                     val loaded = ToolFiles.load(getApplication(), uri)
-                    ToolFiles.extract(getApplication(), loaded)
+                    ToolFiles.extract(getApplication(), loaded) { p ->
+                        _state.value = _state.value.copy(progress = p)
+                    }
                 }
                 _state.value = State(
                     sourceName = doc.sourceName,

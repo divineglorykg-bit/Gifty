@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import com.divineit.convertor.ui.components.ProgressBlock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -298,6 +299,10 @@ fun CompareScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = Muted
             )
+            val progress by comparisonViewModel.progress.collectAsState()
+            if (comparisonState is ComparisonViewModel.UiState.Running) {
+                progress?.let { ProgressBlock(progress = it) }
+            }
             Button(
                 onClick = {
                     val o = original

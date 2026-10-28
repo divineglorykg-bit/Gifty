@@ -13,8 +13,8 @@ android {
         applicationId = "com.divineit.convertor"
         minSdk = 29
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.6.0"
+        versionCode = 4
+        versionName = "0.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

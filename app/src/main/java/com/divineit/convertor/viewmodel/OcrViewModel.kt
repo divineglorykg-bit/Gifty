@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.divineit.convertor.domain.DocumentFormat
 import com.divineit.convertor.domain.export.DocxWriter
 import com.divineit.convertor.domain.extraction.TxtExtractor
+import com.divineit.convertor.domain.progress.WorkProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,8 @@ class OcrViewModel(application: Application) : AndroidViewModel(application) {
         val busy: Boolean = false,
         val sourceName: String? = null,
         val text: String? = null,
-        val message: String? = null
+        val message: String? = null,
+        val progress: WorkProgress? = null
     )
 
     private val _state = MutableStateFlow(State())
@@ -36,7 +38,10 @@ class OcrViewModel(application: Application) : AndroidViewModel(application) {
 
     fun pick(uri: Uri) {
         viewModelScope.launch {
-            _state.value = State(busy = true)
+            _state.value = State(
+                busy = true,
+                progress = WorkProgress("Reading text…")
+            )
             outputBytes = null
             try {
                 val picked = withContext(Dispatchers.IO) {
@@ -46,7 +51,14 @@ class OcrViewModel(application: Application) : AndroidViewModel(application) {
                     DocumentFormat.IMAGE ->
                         ToolFiles.ocrImage(picked.bytes)
                     DocumentFormat.PDF ->
-                        ToolFiles.ocrPdf(getApplication(), picked.uri)
+                        ToolFiles.ocrPdf(getApplication(), picked.uri) { done, total ->
+                            _state.value = _state.value.copy(
+                                progress = WorkProgress(
+                                    "Reading scanned PDF — page $done of $total",
+                                    done, total
+                                )
+                            )
+                        }
                     else -> throw IllegalStateException(
                         "Pick an image or a PDF — OCR reads pictures of text."
                     )
