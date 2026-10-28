@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DIVINE IT CONVERTOR</string>
+    <string name="slot_original_title">UPLOAD ORIGINAL FILE</string>
+    <string name="slot_original_subtitle">The authoritative reference document. Never modified.</string>
+    <string name="slot_product_title">UPLOAD PRODUCT FILE</string>
+    <string name="slot_product_subtitle">The converted or transcribed document to verify and correct.</string>
+    <string name="btn_upload_original">UPLOAD ORIGINAL</string>
+    <string name="btn_upload_product">UPLOAD PRODUCT</string>
+    <string name="btn_preview_original">PREVIEW ORIGINAL</string>
+    <string name="btn_preview_product">PREVIEW PRODUCT</string>
+    <string name="btn_compare">COMPARE FILES</string>
+    <string name="btn_differences">SHOW DIFFERENCES</string>
+    <string name="btn_autocorrect">AUTO-CORRECT PRODUCT</string>
+    <string name="btn_review">REVIEW CORRECTIONS</string>
+    <string name="btn_undo">UNDO CORRECTIONS</string>
+    <string name="btn_report">GENERATE REPORT</string>
+    <string name="btn_export_docx">EXPORT CORRECTED DOCX</string>
+    <string name="btn_save_project">SAVE PROJECT</string>
+    <string name="note_engines_pending">Comparison (Phase 3) and correction (Phase 4) are live. Conversion and editing tools arrive in Phase 5.</string>
+    <string name="preview_phase3_note">Full document preview arrives in a later phase. Phase 3 shows a text snippet for TXT files only.</string>
+    <string name="privacy_note">Nothing leaves this device in Phase 2. No network calls are made. Cloud features (optional, Phase 4) stay off while the local-processing-only switch is on.</string>
+</resources>
