@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      Phase 2 permissions, deliberately minimal:
+      - No storage permission: files are opened through the Storage Access
+        Framework (ACTION_OPEN_DOCUMENT), which grants per-file access.
+      - INTERNET is declared for the OPTIONAL Phase 4 AI feature only. Phase 2
+        makes no network calls. The user can disable all cloud processing in
+        Settings (local-processing-only switch, default ON).
+      - POST_NOTIFICATIONS is declared for future WorkManager progress
+        notifications (Phases 3+). It is not requested in Phase 2.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:name=".ConvertorApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Convertor">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Convertor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
