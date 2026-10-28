@@ -54,9 +54,11 @@ internal fun parseXml(bytes: ByteArray): Document? {
                 "http://apache.org/xml/features/disallow-doctype-decl", true
             )
         } catch (e: Exception) {
+            // Fallback hardening. (XMLConstants.ACCESS_EXTERNAL_DTD and
+            // ACCESS_EXTERNAL_SCHEMA exist on the JVM but NOT in
+            // Android's javax.xml, so they must not be referenced here.)
             try {
-                factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "")
-                factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "")
+                factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
             } catch (ignored: Exception) {
             }
         }
