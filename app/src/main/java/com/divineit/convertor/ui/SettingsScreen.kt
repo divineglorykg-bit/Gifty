@@ -71,7 +71,7 @@ fun SettingsScreen(
                 }
                 Text(
                     "When on, no document or text is sent to any online " +
-                        "service. Cloud AI and cloud OCR (optional, Phase 4) " +
+                        "service. Cloud AI and cloud OCR (optional) " +
                         "stay disabled.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Muted

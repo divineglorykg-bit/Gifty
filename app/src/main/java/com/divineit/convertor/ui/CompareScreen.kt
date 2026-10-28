@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -43,8 +44,8 @@ import com.divineit.convertor.viewmodel.CompareViewModel
 import com.divineit.convertor.viewmodel.ComparisonViewModel
 import com.divineit.convertor.viewmodel.SettingsViewModel
 
-/** The two-slot comparison workspace (Phase 4). Upload, validation,
- *  preview (text snippet for TXT, details otherwise) and project saving
+/** The two-slot comparison workspace. Upload, validation,
+ *  preview (the extracted text of any readable file) and project saving
  *  work; COMPARE FILES runs the real extraction + diff engine; and
  *  AUTO-CORRECT, REVIEW CORRECTIONS, UNDO CORRECTIONS, GENERATE REPORT
  *  and EXPORT CORRECTED DOCX are live, wired to the Phase 4 correction
@@ -70,6 +71,7 @@ fun CompareScreen(
     val comparisonState by comparisonViewModel.state.collectAsState()
     val correctionsState by comparisonViewModel.correctionsState.collectAsState()
     val notice by comparisonViewModel.notice.collectAsState()
+    val previewState by comparisonViewModel.preview.collectAsState()
     val localOnly by settingsViewModel.localOnly.collectAsState()
 
     var previewSlot by remember { mutableStateOf<DocumentSlot?>(null) }
@@ -198,22 +200,64 @@ fun CompareScreen(
                 onPreview = { previewSlot = DocumentSlot.PRODUCT }
             )
 
+            LaunchedEffect(previewSlot) {
+                val slot = previewSlot
+                if (slot == null) {
+                    comparisonViewModel.clearPreview()
+                } else {
+                    val info = if (slot == DocumentSlot.ORIGINAL) original else product
+                    if (info != null) comparisonViewModel.loadPreview(info)
+                }
+            }
+
             if (previewSlot != null) {
-                val info = if (previewSlot == DocumentSlot.ORIGINAL) original else product
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text("Preview", style = MaterialTheme.typography.titleMedium)
-                        if (info?.previewSnippet != null) {
-                            Text(
-                                info.previewSnippet!!,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        } else {
-                            Text(
-                                stringResource(R.string.preview_phase3_note),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Muted
-                            )
+                        when (val ps = previewState) {
+                            is ComparisonViewModel.PreviewUiState.Loading -> {
+                                LinearProgressIndicator(
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Text(
+                                    "Reading the document…",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Muted
+                                )
+                            }
+                            is ComparisonViewModel.PreviewUiState.Ready -> {
+                                Text(
+                                    "${ps.paragraphCount} paragraphs · " +
+                                        "${ps.totalChars} characters",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Muted
+                                )
+                                Column(
+                                    modifier = Modifier
+                                        .heightIn(max = 320.dp)
+                                        .verticalScroll(rememberScrollState())
+                                ) {
+                                    Text(
+                                        ps.text,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                if (ps.truncated) {
+                                    Text(
+                                        "Showing the first part of the document.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Muted
+                                    )
+                                }
+                            }
+                            is ComparisonViewModel.PreviewUiState.Failed -> {
+                                Text(
+                                    ps.message,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Muted
+                                )
+                            }
+                            ComparisonViewModel.PreviewUiState.Idle -> Unit
                         }
                         TextButton(onClick = { previewSlot = null }) {
                             Text("Close preview")

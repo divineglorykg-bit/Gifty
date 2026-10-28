@@ -17,7 +17,6 @@
     <string name="btn_report">GENERATE REPORT</string>
     <string name="btn_export_docx">EXPORT CORRECTED DOCX</string>
     <string name="btn_save_project">SAVE PROJECT</string>
-    <string name="note_engines_pending">Comparison (Phase 3) and correction (Phase 4) are live. Conversion and editing tools arrive in Phase 5.</string>
-    <string name="preview_phase3_note">Full document preview arrives in a later phase. Phase 3 shows a text snippet for TXT files only.</string>
-    <string name="privacy_note">Nothing leaves this device in Phase 2. No network calls are made. Cloud features (optional, Phase 4) stay off while the local-processing-only switch is on.</string>
+    <string name="note_engines_pending">Comparison, correction, conversion and editing tools are all live in this build.</string>
+    <string name="privacy_note">Nothing leaves this device. No network calls are made. Optional cloud features stay off while the local-processing-only switch is on.</string>
 </resources>

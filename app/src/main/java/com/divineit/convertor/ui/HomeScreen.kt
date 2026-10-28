@@ -97,7 +97,7 @@ fun HomeScreen(onNavigate: (String) -> Unit) {
                         )
                         if (destination.comingSoon) {
                             Text(
-                                "Available in a later phase — see the Phase 1 plan.",
+                                "Not available in this build.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Muted
                             )

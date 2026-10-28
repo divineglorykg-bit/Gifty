@@ -43,13 +43,13 @@ object FileValidation {
                 DetectionResult(
                     DocumentFormat.PDF, ContentKind.ENCRYPTED,
                     DocumentStatus.ERROR,
-                    "Password-protected PDF. Decryption is not supported in Phase 2."
+                    "Password-protected PDF. Decryption is not supported."
                 )
             } else {
                 DetectionResult(
                     DocumentFormat.PDF, ContentKind.UNKNOWN,
                     DocumentStatus.READY,
-                    "PDF detected. Text layer is checked during extraction (Phase 3)."
+                    "PDF detected. Its text layer is checked when the file is read."
                 )
             }
         }
@@ -70,7 +70,7 @@ object FileValidation {
             } else {
                 DetectionResult(
                     format, ContentKind.UNKNOWN, DocumentStatus.READY,
-                    "Office document detected. Structure is read in Phase 3."
+                    "Office document detected. Its structure will be read for comparison."
                 )
             }
         }
@@ -80,7 +80,7 @@ object FileValidation {
             return DetectionResult(
                 DocumentFormat.IMAGE, ContentKind.SCANNED,
                 DocumentStatus.READY,
-                "Image detected. Text comes from OCR (Phase 3)."
+                "Image detected. Its text is read with OCR."
             )
         }
 

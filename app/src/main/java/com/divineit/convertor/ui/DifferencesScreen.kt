@@ -100,7 +100,7 @@ fun DifferencesScreen(
                         item {
                             Text(
                                 "No differences found. The extracted content " +
-                                    "matches under the Phase 3 comparison.",
+                                    "matches.",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }

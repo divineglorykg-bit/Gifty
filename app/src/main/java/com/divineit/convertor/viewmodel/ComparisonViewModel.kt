@@ -85,6 +85,88 @@ class ComparisonViewModel(application: Application) : AndroidViewModel(applicati
     private val _notice = MutableStateFlow<String?>(null)
     val notice: StateFlow<String?> = _notice.asStateFlow()
 
+    // ---------------------------------------------------------------
+    // Document preview (completion build): real extracted text for
+    // every readable format, never a placeholder note.
+    // ---------------------------------------------------------------
+
+    sealed interface PreviewUiState {
+        data object Idle : PreviewUiState
+        data object Loading : PreviewUiState
+        data class Ready(
+            val fileName: String,
+            val text: String,
+            val totalChars: Int,
+            val paragraphCount: Int,
+            val truncated: Boolean
+        ) : PreviewUiState
+        data class Failed(val message: String) : PreviewUiState
+    }
+
+    private val _preview = MutableStateFlow<PreviewUiState>(PreviewUiState.Idle)
+    val preview: StateFlow<PreviewUiState> = _preview.asStateFlow()
+
+    fun loadPreview(info: DocumentInfo) {
+        _preview.value = PreviewUiState.Loading
+        viewModelScope.launch {
+            try {
+                val doc = withContext(Dispatchers.IO) { extractForPreview(info) }
+                val full = doc.fullText
+                if (full.isBlank()) {
+                    _preview.value = PreviewUiState.Failed(
+                        "No readable text was found in “${info.displayName}”."
+                    )
+                    return@launch
+                }
+                val cap = 6000
+                _preview.value = PreviewUiState.Ready(
+                    fileName = info.displayName,
+                    text = full.take(cap),
+                    totalChars = full.length,
+                    paragraphCount = doc.paragraphs.size,
+                    truncated = full.length > cap
+                )
+            } catch (e: Exception) {
+                _preview.value = PreviewUiState.Failed(
+                    e.message ?: "Preview is not available for this file."
+                )
+            }
+        }
+    }
+
+    fun clearPreview() {
+        _preview.value = PreviewUiState.Idle
+    }
+
+    /** Preview reads text only — it never starts OCR. A scanned PDF or
+     *  an image gets an honest explanation instead of a long, invisible
+     *  OCR run. */
+    private fun extractForPreview(info: DocumentInfo): ExtractedDocument {
+        if (info.format == DocumentFormat.IMAGE) {
+            throw IllegalStateException(
+                "Preview does not read images. To read this image's text, " +
+                    "open “OCR and Text Extraction” from the home screen."
+            )
+        }
+        val uri = Uri.parse(info.uri)
+        val bytes = readBytes(info, uri)
+        if (info.format == DocumentFormat.PDF) {
+            val extracted = PdfExtractor().extract(bytes, info.displayName)
+            if (extracted.paragraphs.isEmpty()) {
+                throw IllegalStateException(
+                    "This PDF has no text layer — it is a scanned picture — " +
+                        "so there is no text to preview."
+                )
+            }
+            return extracted
+        }
+        val extractor = ExtractorFactory.extractorFor(info.format)
+            ?: throw IllegalStateException(
+                "Preview is not available for ${info.format} files."
+            )
+        return extractor.extract(bytes, info.displayName)
+    }
+
     /** One-shot navigation event, so returning from the differences
      *  screen does not immediately re-navigate. */
     private val _navigateEvent = MutableSharedFlow<Unit>()
