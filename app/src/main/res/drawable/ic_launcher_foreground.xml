@@ -1,0 +1,42 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Document sheet -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M32,22 H66 V86 H32 Z" />
+    <!-- Text lines -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M40,36 H58" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M40,46 H58" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M40,56 H52" />
+    <!-- Conversion arrow (curved, bottom right) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#F5C542"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M60,74 A15,15 0 1,1 78,58" />
+    <path
+        android:fillColor="#F5C542"
+        android:pathData="M78,48 L86,60 L70,62 Z" />
+</vector>
