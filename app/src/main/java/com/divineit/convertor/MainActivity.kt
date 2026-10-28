@@ -22,8 +22,13 @@ import com.divineit.convertor.navigation.Routes
 import com.divineit.convertor.theme.ConvertorTheme
 import com.divineit.convertor.ui.CompareScreen
 import com.divineit.convertor.ui.ComingSoonScreen
+import com.divineit.convertor.ui.ConversionScreen
 import com.divineit.convertor.ui.DifferencesScreen
+import com.divineit.convertor.ui.EditorScreen
+import com.divineit.convertor.ui.HistoryReportsScreen
 import com.divineit.convertor.ui.HomeScreen
+import com.divineit.convertor.ui.OcrScreen
+import com.divineit.convertor.ui.PdfToolsScreen
 import com.divineit.convertor.ui.ProjectsScreen
 import com.divineit.convertor.ui.ReportScreen
 import com.divineit.convertor.ui.ReviewScreen
@@ -98,6 +103,31 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(Routes.REPORT) {
                                 ReportScreen(
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable(Routes.CONVERSION) {
+                                ConversionScreen(
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable(Routes.OCR) {
+                                OcrScreen(
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable(Routes.EDITOR) {
+                                EditorScreen(
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable(Routes.PDF_TOOLS) {
+                                PdfToolsScreen(
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable(Routes.REPORTS) {
+                                HistoryReportsScreen(
                                     onBack = { navController.popBackStack() }
                                 )
                             }

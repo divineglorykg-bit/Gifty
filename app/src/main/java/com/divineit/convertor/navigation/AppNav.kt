@@ -1,8 +1,11 @@
 package com.divineit.convertor.navigation
 
-/** Navigation destinations. Phase 2 implements home, compare, projects and
- *  settings; every other destination shows ComingSoonScreen with the phase
- *  that delivers it, so nothing is presented as working before it exists. */
+/** Navigation destinations. Phase 2 implemented home, compare, projects
+ *  and settings; Phases 3–4 added the comparison flow; Phase 5 wired the
+ *  five remaining home destinations (conversion, OCR, editor, PDF tools,
+ *  reports) to real screens, so nothing on the home screen is a
+ *  placeholder any more. The coming-soon route remains for future
+ *  destinations, with an empty map. */
 object Routes {
     const val HOME = "home"
 
@@ -14,6 +17,11 @@ object Routes {
     const val DIFFERENCES = "differences"
     const val REVIEW = "review"
     const val REPORT = "report"
+    const val CONVERSION = "conversion"
+    const val OCR = "ocr"
+    const val EDITOR = "editor"
+    const val PDF_TOOLS = "pdf_tools"
+    const val REPORTS = "reports"
 
     fun compareRoute(projectId: Long? = null) =
         "compare?projectId=${projectId ?: -1}"
@@ -21,12 +29,6 @@ object Routes {
     fun comingSoon(key: String) = "coming_soon/$key"
 }
 
-/** Key -> (screen title, delivering phase) for not-yet-built destinations. */
-val COMING_SOON_SCREENS = mapOf(
-    "conversion" to ("Document Conversion" to "Phase 5"),
-    "ocr" to ("OCR and Text Extraction" to
-        "Phase 4, built into the Compare screen for scanned PDFs and images"),
-    "editor" to ("Document Editor" to "Phase 5"),
-    "pdf_tools" to ("PDF Tools" to "Phase 5"),
-    "reports" to ("Verification Reports" to "Phase 4")
-)
+/** Key -> (screen title, delivering phase) for not-yet-built
+ *  destinations. Empty since Phase 5: every home destination is real. */
+val COMING_SOON_SCREENS = emptyMap<String, Pair<String, String>>()

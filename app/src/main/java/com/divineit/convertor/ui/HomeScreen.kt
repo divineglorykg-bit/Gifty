@@ -39,27 +39,27 @@ fun HomeScreen(onNavigate: (String) -> Unit) {
         Destination(
             "Document Conversion",
             "Convert between PDF, DOCX, TXT, RTF, ODT, HTML, CSV and XLSX.",
-            Routes.comingSoon("conversion"), comingSoon = true
+            Routes.CONVERSION
         ),
         Destination(
             "OCR and Text Extraction",
             "Read scanned PDFs and images into editable text.",
-            Routes.comingSoon("ocr"), comingSoon = true
+            Routes.OCR
         ),
         Destination(
             "Document Editor",
-            "Edit, format, annotate and sign the corrected document.",
-            Routes.comingSoon("editor"), comingSoon = true
+            "Edit paragraphs, find & replace, save as DOCX or TXT.",
+            Routes.EDITOR
         ),
         Destination(
             "PDF Tools",
-            "Pages, splitting, merging and extraction.",
-            Routes.comingSoon("pdf_tools"), comingSoon = true
+            "Merge, split, rotate and extract text from PDFs.",
+            Routes.PDF_TOOLS
         ),
         Destination(
             "Verification Reports",
-            "Independent re-checks and fidelity reports.",
-            Routes.comingSoon("reports"), comingSoon = true
+            "The recorded history of every correction decision.",
+            Routes.REPORTS
         ),
         Destination(
             "Saved Projects",
